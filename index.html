@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House of Earth</title>
+    <link rel="shortcut icon" href="images/brand.png" type="image/x-icon">
+    <meta name="description" content="A feature-rich, high-performance website architecture.">
+    <!-- Include FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Advanced Web Effects: Custom Cursor -->
+    <div class="custom-cursor"></div>
+    <div class="custom-cursor-trail"></div>
+
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress-bar" id="scrollProgress"></div>
+
+    <!-- Loading Screen -->
+    <div class="loader-wrapper" id="loader">
+        <div class="spinner">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </div>
+    </div>
+
+    <!-- Navbar System -->
+    <header class="navbar glassmorphism" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-logo magnetic-btn">
+                <i class="fa-solid fa-layer-group"></i> House of Earth
+            </a>
+
+            <!-- Search Overlay Trigger -->
+            <div class="nav-search">
+                <input type="text" placeholder="Search AI..." class="search-input" aria-label="Search">
+                <button class="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+
+            <nav class="nav-menu" id="navMenu">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#hero" class="nav-link active">Home</a></li>
+                    <li class="nav-item has-dropdown">
+                        <a href="#features" class="nav-link">Features <i class="fas fa-chevron-down"></i></a>
+                        <!-- Mega Menu Dropdown -->
+                        <div class="dropdown-menu mega-menu">
+                            <div class="mega-col">
+                                <h4>Core Systems</h4>
+                                <a href="#"><i class="fas fa-border-all"></i> Advanced Grid Layouts</a>
+                                <a href="#"><i class="fas fa-mobile-alt"></i> Mobile-First Design</a>
+                                <a href="#"><i class="fas fa-universal-access"></i> ARIA Accessibility</a>
+                            </div>
+                            <div class="mega-col">
+                                <h4>Interactive</h4>
+                                <a href="#"><i class="fas fa-mouse-pointer"></i> Custom Cursors</a>
+                                <a href="#"><i class="fas fa-cube"></i> 3D Tilt Cards</a>
+                                <a href="#"><i class="fas fa-bolt"></i> Dynamic Rendering</a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item"><a href="#portfolio" class="nav-link">Portfolio</a></li>
+                    <li class="nav-item"><a href="#faq" class="nav-link">FAQ</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                <button class="theme-toggle magnetic-btn" id="themeToggle" aria-label="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-primary glow-effect">Get Started</button>
+                <button class="hamburger" id="hamburger" aria-label="Toggle Menu">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section flex-center parallax-bg">
+            <!-- Canvas for Interactive Particle Background -->
+            <canvas id="particleCanvas"></canvas>
+            
+            <div class="hero-content reveal-stagger">
+                <span class="badge fade-in-up">V 2.0 Is Live</span>
+                <h1 class="hero-title glitch" data-text="Rabee Web-creations">
+                    Rabee <span class="text-gradient">Web-creations</span>
+                </h1>
+                <p class="hero-subtitle type-effect" id="typewriter"></p>
+                <div class="hero-buttons fade-in-up">
+                    <a href="#features" class="btn btn-primary ripple-btn magnetic-btn">Explore Features <i class="fas fa-arrow-right"></i></a>
+                    <a href="#portfolio" class="btn btn-outline hover-fill magnetic-btn"><i class="fas fa-play"></i> Watch Demo</a>
+                </div>
+            </div>
+            
+            <div class="scroll-indicator fade-in-up">
+                <div class="mouse">
+                    <div class="wheel"></div>
+                </div>
+            </div>
+            <!-- Wave separator -->
+            <svg class="wave-separator" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                <path fill="var(--bg-color)" fill-opacity="1" d="M0,160L48,165.3C96,171,192,181,288,160C384,139,480,85,576,90.7C672,96,768,160,864,197.3C960,235,1056,245,1152,218.7C1248,192,1344,128,1392,96L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+        </section>
+
+        <!-- Dynamic Grid Features Section -->
+        <section id="features" class="section layout-container">
+            <div class="section-header reveal">
+                <h2 class="section-title text-gradient">600+ Modular Features</h2>
+                <p class="section-desc">Powered by pure CSS and Vanilla JavaScript. Built for ultimate performance.</p>
+            </div>
+            
+            <div class="grid-layout feature-grid">
+                <!-- 3D Tilt Cards -->
+                <div class="feature-card tilt-card reveal">
+                    <div class="card-icon glow-icon"><i class="fas fa-layer-group"></i></div>
+                    <h3>Core Layouts</h3>
+                    <p>Fluid containers, adaptive spacing, CSS Grid structures, and fully responsive multi-breakpoint architectures.</p>
+                    <a href="#" class="card-link animated-underline">Learn More</a>
+                </div>
+                <div class="feature-card tilt-card reveal" style="transition-delay: 100ms;">
+                    <div class="card-icon glow-icon"><i class="fas fa-magic"></i></div>
+                    <h3>CSS Animations</h3>
+                    <p>60fps hardware-accelerated transitions, parallax scrolling, 3D flip effects, and floating element properties.</p>
+                    <a href="#" class="card-link animated-underline">Learn More</a>
+                </div>
+                <div class="feature-card tilt-card reveal" style="transition-delay: 200ms;">
+                    <div class="card-icon glow-icon"><i class="fas fa-bolt"></i></div>
+                    <h3>JS Interactions</h3>
+                    <p>Custom cursors, magnetic buttons, Intersection Observer scroll-spy, and high-performance canvas effects.</p>
+                    <a href="#" class="card-link animated-underline">Learn More</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Portfolio / Gallery -->
+        <section id="portfolio" class="section layout-container alternate-bg">
+            <div class="section-header reveal">
+                <h2 class="section-title">Visual Excellence</h2>
+            </div>
+            
+            <!-- Category Filtering -->
+            <div class="filter-tabs reveal">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="ui">UI/UX</button>
+                <button class="filter-btn" data-filter="webgl">WebGL</button>
+            </div>
+
+            <div class="gallery-grid">
+                <!-- Gallery Item with Hover Effect -->
+                <div class="gallery-item reveal ui" tabindex="0">
+                    <div class="skeleton-img"></div>
+                    <img data-src="
+images/main bg.png                    " alt="UI Design" class="lazy-image">
+                    <div class="gallery-overlay">
+                        <h4>Dashboard UI</h4>
+                        <p>Glassmorphism Analytics</p>
+                        <button class="btn-icon ripple-btn"><i class="fas fa-search-plus"></i></button>
+                    </div>
+                </div>
+                <div class="gallery-item reveal webgl" tabindex="0" style="transition-delay: 100ms;">
+                    <div class="skeleton-img"></div>
+                    <img data-src="
+images/masjid.png               " alt="3D Art" class="lazy-image">
+                    <div class="gallery-overlay">
+                        <h4>3D Particles</h4>
+                        <p>WebGL Interactive Scene</p>
+                        <button class="btn-icon ripple-btn"><i class="fas fa-search-plus"></i></button>
+                    </div>
+                </div>
+                <div class="gallery-item reveal ui" tabindex="0" style="transition-delay: 200ms;">
+                    <div class="skeleton-img"></div>
+                    <img data-src="
+images/brand.png                    " alt="Data" class="lazy-image">
+                    <div class="gallery-overlay">
+                        <h4>Data Visualization</h4>
+                        <p>Real-time JS Charts</p>
+                        <button class="btn-icon ripple-btn"><i class="fas fa-search-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive FAQ Accordion -->
+        <section id="faq" class="section layout-container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Knowledge Base</h2>
+                <p class="section-desc">Expandable sections with smooth CSS height transitions.</p>
+            </div>
+            
+            <div class="accordion-container reveal">
+                <div class="accordion-item">
+                    <button class="accordion-header" aria-expanded="false">
+                        <span>How is this optimized for performance?</span>
+                        <i class="fas fa-plus icon"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p>We use vanilla JavaScript with Intersection Observers for lazy loading, passive event listeners for scrolling, CSS variables for theming, and hardware-accelerated CSS transforms (`translate3d`) to ensure a smooth 60 FPS experience.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-header" aria-expanded="false">
+                        <span>Does it support mobile devices perfectly?</span>
+                        <i class="fas fa-plus icon"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p>Yes, built with a mobile-first fluid grid system. Typography scales using CSS `clamp()`, and the flexbox/grid containers automatically adjust based on viewport breakpoints.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <button class="accordion-header" aria-expanded="false">
+                        <span>Are accessibility standards met?</span>
+                        <i class="fas fa-plus icon"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p>Absolutely. Semantic HTML, proper ARIA attributes, keyboard-navigable focus states, and scalable font sizing are baked into the core structure.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Form Interaction -->
+        <section class="section layout-container alternate-bg">
+            <div class="contact-layout reveal">
+                <div class="contact-info">
+                    <h2 class="section-title">Get in Touch</h2>
+                    <p>Experience real-time form validation and interactive floating labels.</p>
+                    <ul class="info-list">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Tech Avenue, Silicon Valley</li>
+                        <li><i class="fas fa-envelope"></i> hello@nexus.dev</li>
+                        <li><i class="fas fa-phone-alt"></i> +1 (555) 123-4567</li>
+                    </ul>
+                </div>
+                <div class="contact-form-container glass-card">
+                    <form id="contactForm" class="interactive-form">
+                        <div class="form-group">
+                            <input type="text" id="name" required class="form-input">
+                            <label for="name" class="floating-label">Full Name</label>
+                            <span class="focus-border"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" required class="form-input">
+                            <label for="email" class="floating-label">Email Address</label>
+                            <span class="focus-border"></span>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" required class="form-input" rows="4"></textarea>
+                            <label for="message" class="floating-label">Your Message</label>
+                            <span class="focus-border"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary full-width ripple-btn">
+                            <span class="btn-text">Send Message <i class="fas fa-paper-plane"></i></span>
+                            <div class="loading-ring"></div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Multi-Feature Footer System -->
+    <footer class="footer-system">
+        <!-- SVG Wave Top -->
+        <div class="footer-wave-container">
+            <svg class="footer-wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                <path fill="var(--footer-bg)" fill-opacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,213.3C672,224,768,224,864,213.3C960,203,1056,181,1152,176C1248,171,1344,181,1392,186.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+        </div>
+        
+        <div class="footer-content layout-container grid-layout footer-grid">
+            <div class="footer-col brand-col">
+                <a href="#" class="brand-logo"><i class="fa-solid fa-layer-group"></i> Nexus</a>
+                <p class="footer-desc">Designing the future of scalable web architecture with ultra-modern UI patterns and performance standards.</p>
+                <div class="social-icons">
+                    <a href="#" class="social-link tooltip-trigger" data-tooltip="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link tooltip-trigger" data-tooltip="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-link tooltip-trigger" data-tooltip="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-link tooltip-trigger" data-tooltip="Dribbble"><i class="fab fa-dribbble"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-col">
+                <h4 class="footer-heading">Platform</h4>
+                <ul class="footer-links">
+                    <li><a href="#" class="hover-slide">Features Overview</a></li>
+                    <li><a href="#" class="hover-slide">Responsive Grid</a></li>
+                    <li><a href="#" class="hover-slide">Animations Setup</a></li>
+                    <li><a href="#" class="hover-slide">Release Notes</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col">
+                <h4 class="footer-heading">Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="#" class="hover-slide">Documentation</a></li>
+                    <li><a href="#" class="hover-slide">API Reference</a></li>
+                    <li><a href="#" class="hover-slide">Community Forum</a></li>
+                    <li><a href="#" class="hover-slide">Help Center</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col newsletter-col">
+                <h4 class="footer-heading">Stay Updated</h4>
+                <p>Subscribe for updates and UI insights.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Email address" required class="newsletter-input">
+                    <button type="submit" class="btn btn-primary newsletter-btn"><i class="fas fa-arrow-right"></i></button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="footer-bottom layout-container">
+            <div class="copyright">
+                &copy; 2024 Nexus Platform. All rights reserved.
+            </div>
+            <div class="legal-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Cookie Settings</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Actions -->
+    <button id="backToTop" class="back-to-top magnetic-btn" aria-label="Back to Top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+    
+    <div class="toast-notification" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span>Action completed successfully!</span>
+    </div>
+
+    <!-- Script connection -->
+    <script src="script.js"></script>
+</body>
+</html>

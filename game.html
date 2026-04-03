@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Y-ARK: 2D Action Platformer</title>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #0d1117; font-family: sans-serif; touch-action: none; }
+        canvas { display: block; width: 100vw; height: 100vh; }
+        
+        /* Comic Style UI */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .hud { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 0 #000; }
+        
+        /* Mobile Touch Controls */
+        .touch-zone { position: absolute; bottom: 20px; pointer-events: auto; display: flex; gap: 10px; }
+        .d-pad { left: 20px; }
+        .actions { right: 20px; }
+        .btn { 
+            width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2); border: 2px solid #fff; 
+            border-radius: 50%; color: #fff; font-size: 14px; font-weight: bold; 
+            display: flex; justify-content: center; align-items: center; user-select: none;
+        }
+        .btn:active { background: rgba(255, 50, 50, 0.6); transform: scale(0.9); }
+        
+        @media (min-width: 1024px) {
+            .touch-zone { display: none; } /* Hide on desktop */
+            .hud::after { content: " | WASD/Arrows to Move | Left Click/Tap Building to Swing | Space to Jump | Shift to Dash"; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui-layer">
+        <div class="hud" id="scoreDisplay">Y-ARK | Score: 0</div>
+        
+        <div class="touch-zone d-pad">
+            <div class="btn" id="btnLeft">◀</div>
+            <div class="btn" id="btnRight">▶</div>
+        </div>
+        <div class="touch-zone actions">
+            <div class="btn" id="btnDash">Dash</div>
+            <div class="btn" id="btnJump">Jump</div>
+            <div class="btn" id="btnWeb">Web</div>
+        </div>
+    </div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+// --- Game State & Input ---
+const keys = { left: false, right: false, up: false, dash: false };
+const mouse = { x: 0, y: 0, down: false, worldX: 0, worldY: 0 };
+let score = 0;
+let camera = { x: 0, y: 0 };
+
+// --- Player Physics & Mechanics ---
+const player = {
+    x: 0, y: 0, width: 30, height: 50,
+    vx: 0, vy: 0,
+    speed: 0.8, maxSpeed: 8, friction: 0.85, airFriction: 0.98,
+    gravity: 0.6, jumpForce: -12, doubleJump: true,
+    wallSliding: false, dashCooldown: 0,
+    web: { active: false, x: 0, y: 0, length: 0 }
+};
+
+// --- Level Generation ---
+let buildings = [];
+let enemies = [];
+const generateCity = () => {
+    let currentX = -500;
+    for (let i = 0; i < 100; i++) {
+        let w = 200 + Math.random() * 300;
+        let h = 300 + Math.random() * 500;
+        // Make the very first building extra wide so we have a good starting platform
+        if (i === 0) { w = 600; currentX = -100; }
+        
+        buildings.push({ x: currentX, y: height - h + 300, w: w, h: h, color: `hsl(${Math.random()*40+200}, 40%, 15%)` });
+        
+        // Spawn Enemy (don't spawn on the first building)
+        if (i > 0 && Math.random() > 0.5) {
+            enemies.push({ x: currentX + w/2, y: height - h + 260, w: 30, h: 40, vx: 2, alive: true, patrolStart: currentX, patrolEnd: currentX + w });
+        }
+        currentX += w + 100 + Math.random() * 200; // Gap between buildings
+    }
+};
+
+// --- Initial Spawn Setup ---
+function spawnPlayerSafely() {
+    // Find the building currently under or closest to the player's X position
+    let safeBuilding = buildings[0];
+    for (let b of buildings) {
+        if (player.x >= b.x && player.x <= b.x + b.w) {
+            safeBuilding = b;
+            break;
+        } else if (b.x < player.x) {
+            safeBuilding = b; // Keep tracking the nearest building passed
+        }
+    }
+    
+    // Set player exactly on top of the chosen building
+    player.x = safeBuilding.x + (safeBuilding.w / 2);
+    player.y = safeBuilding.y - player.height;
+    player.vx = 0;
+    player.vy = 0;
+    player.web.active = false;
+    
+    // Snap camera to player so there's no weird jump cut
+    camera.x = player.x - width / 2;
+    camera.y = player.y - height / 2;
+}
+
+// Initialize World
+generateCity();
+spawnPlayerSafely();
+
+// --- Input Handling ---
+window.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = true;
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = true;
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') jump();
+    if (e.code === 'ShiftLeft') dash();
+});
+window.addEventListener('keyup', (e) => {
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
+});
+window.addEventListener('mousedown', (e) => shootWeb(e.clientX, e.clientY));
+window.addEventListener('mouseup', releaseWeb);
+
+// Mobile Controls
+const bindBtn = (id, key, action) => {
+    const btn = document.getElementById(id);
+    btn.addEventListener('touchstart', (e) => { e.preventDefault(); if(action) action(); else keys[key] = true; });
+    btn.addEventListener('touchend', (e) => { e.preventDefault(); if(!action) keys[key] = false; });
+};
+bindBtn('btnLeft', 'left');
+bindBtn('btnRight', 'right');
+bindBtn('btnJump', null, jump);
+bindBtn('btnDash', null, dash);
+bindBtn('btnWeb', null, () => autoWeb());
+
+function jump() {
+    if (player.wallSliding) {
+        player.vy = player.jumpForce;
+        player.vx = player.vx > 0 ? -10 : 10; // Wall jump
+        player.wallSliding = false;
+    } else if (player.vy === 0) {
+        player.vy = player.jumpForce;
+    } else if (player.doubleJump) {
+        player.vy = player.jumpForce * 0.8;
+        player.doubleJump = false;
+    }
+    releaseWeb();
+}
+
+function dash() {
+    if (player.dashCooldown <= 0) {
+        player.vx = keys.left ? -20 : (keys.right ? 20 : (player.vx > 0 ? 20 : -20));
+        player.dashCooldown = 60;
+    }
+}
+
+function shootWeb(screenX, screenY) {
+    let targetX = screenX + camera.x;
+    let targetY = screenY + camera.y;
+    // Find building hit
+    for (let b of buildings) {
+        if (targetX > b.x && targetX < b.x + b.w && targetY < b.y + 100) {
+            player.web = { active: true, x: targetX, y: targetY, length: Math.hypot(targetX - player.x, targetY - player.y) };
+            break;
+        }
+    }
+}
+
+function autoWeb() {
+    // For mobile: target nearest upper building corner
+    if (player.web.active) return releaseWeb();
+    let best = null, minDist = Infinity;
+    buildings.forEach(b => {
+        let dist = Math.hypot((b.x + b.w/2) - player.x, b.y - player.y);
+        if (b.y < player.y && dist < 600 && dist < minDist) { minDist = dist; best = { x: player.vx > 0 ? b.x : b.x + b.w, y: b.y }; }
+    });
+    if (best) player.web = { active: true, x: best.x, y: best.y, length: minDist * 0.8 };
+}
+
+function releaseWeb() {
+    if (player.web.active) {
+        player.vy -= 5; // Momentum boost on release
+        player.web.active = false;
+    }
+}
+
+// --- Main Game Loop ---
+function update() {
+    // Movement
+    if (keys.left) player.vx -= player.speed;
+    if (keys.right) player.vx += player.speed;
+    
+    // Physics & Web Swinging
+    player.wallSliding = false;
+    if (player.web.active) {
+        // Pendulum constraint logic
+        let dx = player.x - player.web.x;
+        let dy = player.y - player.web.y;
+        let dist = Math.hypot(dx, dy);
+        
+        if (dist > player.web.length) {
+            let diff = dist - player.web.length;
+            let nx = dx / dist, ny = dy / dist;
+            player.x -= nx * diff; player.y -= ny * diff;
+            
+            // Adjust velocity to swing arc
+            let dot = player.vx * nx + player.vy * ny;
+            player.vx -= nx * dot; player.vy -= ny * dot;
+        }
+        player.vy += player.gravity * 0.8; // Reduced gravity while swinging
+        player.vx *= 0.99; player.vy *= 0.99; // Air friction
+    } else {
+        player.vy += player.gravity; // Normal gravity
+        let friction = player.vy === 0 ? player.friction : player.airFriction;
+        player.vx *= friction;
+    }
+
+    // Apply Velocity
+    player.x += player.vx;
+    player.y += player.vy;
+    if (player.dashCooldown > 0) player.dashCooldown--;
+
+    // Death / Falling Out of Bounds Logic
+    if (player.y > height + 500) { 
+        score = 0; // Reset score as penalty
+        spawnPlayerSafely(); // Instantly place back on a building
+    } 
+
+    // Floor & Building Collisions
+    let onGround = false;
+
+    buildings.forEach(b => {
+        // Simple AABB Collision
+        if (player.x < b.x + b.w && player.x + player.width > b.x &&
+            player.y < b.y + b.h && player.y + player.height > b.y) {
+            
+            // Resolve overlap
+            let overBottom = (b.y + b.h) - player.y;
+            let overTop = (player.y + player.height) - b.y;
+            let overRight = (b.x + b.w) - player.x;
+            let overLeft = (player.x + player.width) - b.x;
+            
+            let min = Math.min(overBottom, overTop, overRight, overLeft);
+            
+            if (min === overTop) { player.y = b.y - player.height; player.vy = 0; onGround = true; player.doubleJump = true; }
+            else if (min === overLeft) { player.x = b.x - player.width; player.vx = 0; player.wallSliding = true; }
+            else if (min === overRight) { player.x = b.x + b.w; player.vx = 0; player.wallSliding = true; }
+            else if (min === overBottom) { player.y = b.y + b.h; player.vy = 0; }
+        }
+    });
+
+    if (player.wallSliding && player.vy > 0) player.vy *= 0.8; // Slide effect
+
+    // Update Enemies
+    enemies.forEach(e => {
+        if (!e.alive) return;
+        e.x += e.vx;
+        if (e.x > e.patrolEnd || e.x < e.patrolStart) e.vx *= -1;
+        
+        // Combat / Hit Detection
+        if (player.x < e.x + e.w && player.x + player.width > e.x && player.y < e.y + e.h && player.y + player.height > e.y) {
+            if (player.vy > 0 || Math.abs(player.vx) > 10) { // Ground slam or dash kill
+                e.alive = false; score += 100; player.vy = -8; // Bounce off enemy
+            } else {
+                score -= 10; player.vx *= -1.5; // Take damage/knockback
+            }
+        }
+    });
+
+    // Camera follow player smoothly
+    camera.x += (player.x - width / 2 - camera.x) * 0.1;
+    camera.y += (player.y - height / 2 - camera.y) * 0.1;
+
+    document.getElementById('scoreDisplay').innerText = `Y-ARK | Score: ${score}`;
+}
+
+// --- Rendering ---
+function draw() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.save();
+    ctx.translate(-camera.x, -camera.y);
+
+    // Draw Buildings
+    buildings.forEach(b => {
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        // Add some comic-style window details
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        for(let wy=b.y+20; wy<b.y+b.h; wy+=40) {
+            if(wy > camera.y + height) break;
+            ctx.fillRect(b.x+20, wy, 20, 20); ctx.fillRect(b.x+60, wy, 20, 20);
+        }
+    });
+
+    // Draw Enemies
+    enemies.forEach(e => {
+        if (!e.alive) return;
+        ctx.fillStyle = '#ff0055'; // Vibrant enemy color
+        ctx.fillRect(e.x, e.y, e.w, e.h);
+    });
+
+    // Draw Web
+    if (player.web.active) {
+        ctx.beginPath();
+        ctx.moveTo(player.x + player.width/2, player.y + player.height/2);
+        ctx.lineTo(player.web.x, player.web.y);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Web collision impact particles could go here
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(player.web.x, player.web.y, 5, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Draw Player (Spider-Hero Style)
+    ctx.fillStyle = '#0077ff'; // Blue base
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+    ctx.fillStyle = '#ff0000'; // Red accents
+    ctx.fillRect(player.x + 5, player.y, player.width - 10, 20); // chest
+    
+    // Dash Trail Effect
+    if (Math.abs(player.vx) > 12) {
+        ctx.fillStyle = 'rgba(0, 119, 255, 0.4)';
+        ctx.fillRect(player.x - player.vx, player.y, player.width, player.height);
+    }
+
+    ctx.restore();
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+// Handle resize
+window.addEventListener('resize', () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; });
+
+// Start Game
+loop();
+</script>
+</body>
+</html>
